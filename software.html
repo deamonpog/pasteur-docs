@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Software Stack — pasteur</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="layout">
+
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="cluster-name">pasteur</div>
+      <div class="subtitle">CASL HPC Cluster</div>
+      <div class="org-tag">CASL &bull; Complex Adaptive Systems Lab</div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-label">Overview</div>
+        <a class="nav-link" href="index.html"><span class="icon">⌂</span> Home</a>
+        <a class="nav-link" href="getting-started.html"><span class="icon">▶</span> Getting Started</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">Storage</div>
+        <a class="nav-link" href="storage.html"><span class="icon">◈</span> Storage Layout</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">Jobs</div>
+        <a class="nav-link" href="slurm.html"><span class="icon">⚙</span> Slurm &amp; Scheduling</a>
+        <a class="nav-link" href="gpu-jobs.html"><span class="icon">▣</span> GPU Jobs</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">Software</div>
+        <a class="nav-link" href="software.html"><span class="icon">⬡</span> Software Stack</a>
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="version">v1.0 &mdash; pasteur</div>
+      <div style="margin-top:4px;">Ubuntu 24.04 LTS &bull; Slurm</div>
+    </div>
+  </nav>
+
+  <div class="overlay" id="overlay"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="hamburger" id="hamburger">☰</button>
+        <div class="topbar-breadcrumb">pasteur / <span>Software Stack</span></div>
+      </div>
+      <div class="topbar-right">
+        <span class="badge badge-green">● Online</span>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="page-header">
+        <h1>Software Stack</h1>
+        <p class="lead">pasteur provides two primary software deployment mechanisms: <strong>Miniforge / Mamba</strong> for conda-based Python environments, and <strong>Apptainer</strong> for container-based reproducible workloads.</p>
+        <div class="meta">
+          <span class="badge chip chip-amber">Miniforge 3</span>
+          <span class="badge chip chip-blue">Apptainer 1.4.5</span>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════ -->
+      <!-- CONDA / MINIFORGE                               -->
+      <!-- ═══════════════════════════════════════════════ -->
+      <h2>Conda / Miniforge</h2>
+      <p>pasteur uses <strong>Miniforge</strong> — a minimal conda installer with the <code>conda-forge</code> channel pre-configured. The faster <strong>mamba</strong> solver is included and is the recommended way to create and install packages.</p>
+
+      <p>Miniforge is installed at <code>/opt/miniforge3</code> and is available on both pasteur-login and the compute node. It is mounted read-only on the login VM via NFS.</p>
+
+      <h3>Activation</h3>
+      <p>Conda is activated automatically when you log in. If for any reason it isn't, initialize it manually:</p>
+
+      <pre><code><span class="comment"># Conda is auto-loaded via /etc/profile.d/miniforge.sh</span>
+<span class="comment"># Verify it's available:</span>
+<span class="prompt">$ </span>conda --version
+<span class="output">conda 26.1.0</span>
+
+<span class="prompt">$ </span>mamba --version
+<span class="output">mamba 1.x.x</span>
+
+<span class="comment"># If not available, source manually:</span>
+<span class="prompt">$ </span>source /opt/miniforge3/etc/profile.d/conda.sh</code><span class="cmd-label">pasteur-login</span></pre>
+
+      <h3>Creating Environments</h3>
+      <p>Always create personal environments under <code>/data/apps/&lt;username&gt;/</code> — not in <code>/opt/miniforge3</code> (which is read-only) and not in your home directory (quota too small).</p>
+
+      <pre><code><span class="comment"># Create a new environment (use mamba, not conda — it's faster)</span>
+<span class="prompt">$ </span>mamba create <span class="flag">--prefix</span> /data/apps/$USER/my-env python=3.11
+<span class="output">  ... solving environment ...</span>
+<span class="output">  ... downloading packages ...</span>
+
+<span class="comment"># Activate it</span>
+<span class="prompt">$ </span>conda activate /data/apps/$USER/my-env
+<span class="output">(/data/apps/jsmith/my-env) $ </span>
+
+<span class="comment"># Install packages</span>
+<span class="prompt">$ </span>mamba install numpy pandas scikit-learn matplotlib jupyter
+
+<span class="comment"># Install PyTorch with CUDA (H200 is CUDA 12.x compatible)</span>
+<span class="prompt">$ </span>mamba install pytorch torchvision torchaudio pytorch-cuda=12.1 <span class="flag">-c</span> pytorch <span class="flag">-c</span> nvidia
+
+<span class="comment"># Install from pip inside an active mamba env</span>
+<span class="prompt">$ </span>pip install transformers accelerate datasets</code><span class="cmd-label">pasteur-login</span></pre>
+
+      <h3>Using Environments in Job Scripts</h3>
+      <pre><code><span class="kw">#!/bin/bash</span>
+<span class="flag">#SBATCH --job-name</span>=ml_train
+<span class="flag">#SBATCH --partition</span>=standard
+<span class="flag">#SBATCH --gres</span>=gpu:1
+<span class="comment"># ... other SBATCH options ...</span>
+
+<span class="comment"># Always source conda before activating in a batch job</span>
+source /opt/miniforge3/etc/profile.d/conda.sh
+conda activate /data/apps/$USER/torch-env
+
+<span class="comment"># Confirm environment</span>
+echo "Python: $(which python)"
+echo "PyTorch: $(python -c 'import torch; print(torch.__version__)')"
+
+python train.py</code><span class="cmd-label">job.sh</span></pre>
+
+      <h3>Shared Lab Environments</h3>
+      <p>Admins maintain shared conda environments at <code>/data/apps/casl/common/</code> for commonly used packages. These are read-only and available to all users without any setup.</p>
+
+      <pre><code><span class="comment"># List shared environments</span>
+<span class="prompt">$ </span>ls /data/apps/casl/common/
+
+<span class="comment"># Activate a shared env</span>
+<span class="prompt">$ </span>conda activate /data/apps/casl/common/&lt;env-name&gt;
+
+<span class="comment"># Do NOT install packages into shared envs — they are read-only.</span>
+<span class="comment"># Clone one to your space if you need to modify it:</span>
+<span class="prompt">$ </span>mamba create <span class="flag">--prefix</span> /data/apps/$USER/my-clone \
+           <span class="flag">--clone</span> /data/apps/casl/common/&lt;env-name&gt;</code><span class="cmd-label">pasteur-login</span></pre>
+
+      <h3>Useful Conda Commands</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Task</th><th>Command</th></tr></thead>
+          <tbody>
+            <tr><td>List your environments</td><td><code>conda env list</code></td></tr>
+            <tr><td>List installed packages</td><td><code>conda list</code></td></tr>
+            <tr><td>Update all packages</td><td><code>mamba update --all</code></td></tr>
+            <tr><td>Export environment</td><td><code>conda env export &gt; env.yml</code></td></tr>
+            <tr><td>Recreate from file</td><td><code>mamba env create --prefix /data/apps/$USER/env -f env.yml</code></td></tr>
+            <tr><td>Delete environment</td><td><code>conda env remove --prefix /data/apps/$USER/env</code></td></tr>
+            <tr><td>Search for package</td><td><code>mamba search package-name</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════ -->
+      <!-- APPTAINER                                        -->
+      <!-- ═══════════════════════════════════════════════ -->
+      <h2>Apptainer Containers</h2>
+      <p>Apptainer (formerly Singularity) v1.4.5 is installed on pasteur. Containers give you a completely reproducible software environment — useful for workflows that depend on specific system libraries, CUDA versions, or external software stacks (e.g., GROMACS, OpenFOAM, pre-built NGC images).</p>
+
+      <div class="callout callout-info">
+        <span class="callout-icon">ℹ</span>
+        <div class="callout-body">
+          <strong>Apptainer vs Docker</strong>
+          HPC clusters don't run Docker (it requires root). Apptainer achieves the same reproducibility without root access. It can also directly convert Docker Hub and NGC images to <code>.sif</code> format.
+        </div>
+      </div>
+
+      <h3>Shared Container Library</h3>
+      <p>Pre-pulled containers are stored at <code>/data/shared/containers/</code>. Check there before pulling your own — common ML and scientific containers may already be available.</p>
+
+      <pre><code><span class="comment"># List available shared containers</span>
+<span class="prompt">$ </span>ls /data/shared/containers/
+<span class="output">pytorch-24.01.sif    tensorflow-24.01.sif    cuda-12.3.sif</span></code><span class="cmd-label">pasteur-login</span></pre>
+
+      <h3>Pulling Containers</h3>
+      <pre><code><span class="comment"># Pull from Docker Hub</span>
+<span class="prompt">$ </span>apptainer pull /data/apps/$USER/containers/ubuntu.sif \
+    docker://ubuntu:24.04
+
+<span class="comment"># Pull from NVIDIA NGC (recommended for GPU workloads)</span>
+<span class="prompt">$ </span>apptainer pull /data/apps/$USER/containers/pytorch.sif \
+    docker://nvcr.io/nvidia/pytorch:24.01-py3
+
+<span class="comment"># Pull from Apptainer Hub</span>
+<span class="prompt">$ </span>apptainer pull library://lolcow_latest.sif \
+    library://sylabs/examples/lolcow:latest</code><span class="cmd-label">pasteur-login</span></pre>
+
+      <div class="callout callout-warning">
+        <span class="callout-icon">⚠</span>
+        <div class="callout-body">
+          <strong>Store containers in /data/apps/&lt;user&gt; or /data/shared/containers</strong>
+          .sif files are often several GB. Never store them in your home directory — you'll quickly exhaust your 5 GB home quota.
+        </div>
+      </div>
+
+      <h3>Running Containers</h3>
+      <pre><code><span class="comment"># Run a command inside the container</span>
+<span class="prompt">$ </span>apptainer exec /data/apps/$USER/containers/pytorch.sif \
+    python -c "import torch; print(torch.cuda.is_available())"
+
+<span class="comment"># Interactive shell inside container</span>
+<span class="prompt">$ </span>apptainer shell /data/apps/$USER/containers/pytorch.sif
+
+<span class="comment"># Bind-mount your data directory inside the container</span>
+<span class="comment"># /data is usually auto-bound, but you can be explicit:</span>
+<span class="prompt">$ </span>apptainer exec \
+    <span class="flag">--bind</span> /data/scratch/$USER:/workspace \
+    /data/apps/$USER/containers/pytorch.sif \
+    python /workspace/train.py</code><span class="cmd-label">pasteur</span></pre>
+
+      <h3>Using Containers in Slurm Jobs</h3>
+      <pre><code><span class="kw">#!/bin/bash</span>
+<span class="flag">#SBATCH --job-name</span>=container_job
+<span class="flag">#SBATCH --partition</span>=standard
+<span class="flag">#SBATCH --time</span>=12:00:00
+<span class="flag">#SBATCH --gres</span>=gpu:1
+<span class="flag">#SBATCH --cpus-per-task</span>=8
+<span class="flag">#SBATCH --mem</span>=64G
+<span class="flag">#SBATCH --output</span>=%x_%j.out
+
+SIF=/data/shared/containers/pytorch-24.01.sif
+
+<span class="comment"># --nv passes GPU access into the container</span>
+apptainer exec <span class="flag">--nv</span> \
+    <span class="flag">--bind</span> /data/scratch/$USER:/workspace \
+    $SIF \
+    python /workspace/train.py \
+        <span class="flag">--data</span> /workspace/dataset \
+        <span class="flag">--output</span> /workspace/checkpoints</code><span class="cmd-label">container_job.sh</span></pre>
+
+      <div class="callout callout-success">
+        <span class="callout-icon">✓</span>
+        <div class="callout-body">
+          <strong>Always use --nv for GPU containers</strong>
+          The <code>--nv</code> flag tells Apptainer to expose NVIDIA GPU drivers from the host into the container. Without it, your container will not see the GPU even if one was allocated by Slurm.
+        </div>
+      </div>
+
+      <h3>Building Custom Containers</h3>
+      <p>If you need a custom container, write a definition file (<code>.def</code>) and build it. Building requires root or a sandbox approach — contact an admin if you need a custom image built:</p>
+
+      <pre><code><span class="comment"># Example definition file (my_env.def)</span>
+Bootstrap: docker
+From: nvcr.io/nvidia/pytorch:24.01-py3
+
+%post
+    pip install transformers accelerate datasets peft
+
+%environment
+    export HF_HOME=/workspace/.cache/huggingface
+
+%labels
+    Author jsmith@university.edu
+    Version 1.0</code><span class="cmd-label">my_env.def</span></pre>
+
+      <!-- Summary table -->
+      <h2>When to Use What</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Scenario</th>
+              <th>Recommended approach</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Python ML/data science work</td>
+              <td>Conda env via <code>mamba</code> in <code>/data/apps/$USER/</code></td>
+            </tr>
+            <tr>
+              <td>Specific CUDA version required</td>
+              <td>Apptainer with NGC container (<code>--nv</code>)</td>
+            </tr>
+            <tr>
+              <td>Compiled C++/Fortran software</td>
+              <td>Apptainer container</td>
+            </tr>
+            <tr>
+              <td>Sharing a reproducible environment</td>
+              <td>Apptainer .sif in <code>/data/shared/containers/</code></td>
+            </tr>
+            <tr>
+              <td>Quick prototype / exploration</td>
+              <td>Shared conda env at <code>/data/apps/casl/common/</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+    <footer class="page-footer">
+      <span>pasteur — CASL HPC Cluster Documentation</span>
+      <span>Maintained by CASL Admins</span>
+    </footer>
+  </div>
+</div>
+<script src="js/main.js"></script>
+</body>
+</html>

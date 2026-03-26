@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Getting Started — pasteur</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="layout">
+
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="cluster-name">pasteur</div>
+      <div class="subtitle">CASL HPC Cluster</div>
+      <div class="org-tag">CASL &bull; Complex Adaptive Systems Lab</div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-label">Overview</div>
+        <a class="nav-link" href="index.html"><span class="icon">⌂</span> Home</a>
+        <a class="nav-link" href="getting-started.html"><span class="icon">▶</span> Getting Started</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">Storage</div>
+        <a class="nav-link" href="storage.html"><span class="icon">◈</span> Storage Layout</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">Jobs</div>
+        <a class="nav-link" href="slurm.html"><span class="icon">⚙</span> Slurm &amp; Scheduling</a>
+        <a class="nav-link" href="gpu-jobs.html"><span class="icon">▣</span> GPU Jobs</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">Software</div>
+        <a class="nav-link" href="software.html"><span class="icon">⬡</span> Software Stack</a>
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="version">v1.0 &mdash; pasteur</div>
+      <div style="margin-top:4px;">Ubuntu 24.04 LTS &bull; Slurm</div>
+    </div>
+  </nav>
+
+  <div class="overlay" id="overlay"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="hamburger" id="hamburger">☰</button>
+        <div class="topbar-breadcrumb">pasteur / <span>Getting Started</span></div>
+      </div>
+      <div class="topbar-right">
+        <span class="badge badge-green">● Online</span>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="page-header">
+        <h1>Getting Started</h1>
+        <p class="lead">Everything you need to access pasteur for the first time — SSH setup, environment orientation, and basic verification steps.</p>
+        <div class="meta">
+          <span class="badge chip chip-amber">New Users</span>
+          <span class="badge chip chip-blue">SSH</span>
+        </div>
+      </div>
+
+      <!-- Account -->
+      <h2>Step 1 — Get an Account</h2>
+      <p>Access to pasteur requires an account provisioned by a cluster administrator. Contact <strong>Dr. Garibay</strong> or the CASL lab admins to request access. Provide your preferred username and university affiliation.</p>
+      <div class="callout callout-info">
+        <span class="callout-icon">ℹ</span>
+        <div class="callout-body">
+          <strong>Username policy</strong>
+          Usernames, once created, cannot be reused if deleted. Choose carefully. Typically, your username matches your university NetID.
+        </div>
+      </div>
+
+      <!-- SSH Access -->
+      <h2>Step 2 — Connect via SSH</h2>
+      <p>All user access is through the login node <strong>pasteur-login</strong>. You do not SSH directly to the compute node.</p>
+
+      <pre><code><span class="prompt">$ </span>ssh <span class="hl">your-username</span>@pasteur-login.your-university.edu
+<span class="output">Welcome to pasteur-login (Ubuntu 24.04 LTS)</span>
+<span class="output">CASL HPC Cluster — Login Node</span>
+<span class="output">Do not run compute jobs on this node. Submit jobs via Slurm.</span></code><span class="cmd-label">bash</span></pre>
+
+      <p>Replace <code>your-username</code> with your cluster account name and <code>pasteur-login.your-university.edu</code> with the hostname provided by your admin.</p>
+
+      <h3>SSH Key Setup (Recommended)</h3>
+      <p>Password authentication works but key-based authentication is faster and more secure. Generate a key pair on your local machine if you don't already have one:</p>
+
+      <pre><code><span class="comment"># On your LOCAL machine</span>
+<span class="prompt">$ </span>ssh-keygen -t ed25519 -C "your-email@university.edu"
+<span class="prompt">$ </span>ssh-copy-id <span class="hl">your-username</span>@pasteur-login.your-university.edu</code><span class="cmd-label">local</span></pre>
+
+      <p>After this, SSH will authenticate automatically using your key.</p>
+
+      <h3>Windows Users (MobaXterm)</h3>
+      <p>If you're using MobaXterm:</p>
+      <ol>
+        <li>Create a new <strong>SSH session</strong> with the login node hostname</li>
+        <li>Set your username in the session settings</li>
+        <li>Use MobaXterm's built-in key manager to load your private key (optional but recommended)</li>
+        <li>Save the session for future use</li>
+      </ol>
+
+      <!-- Environment -->
+      <h2>Step 3 — Explore Your Environment</h2>
+      <p>Once logged in to pasteur-login, your home directory lives on the NFS-shared <code>/data</code> filesystem:</p>
+
+      <pre><code><span class="prompt">$ </span>pwd
+<span class="output">/data/home/your-username</span>
+
+<span class="prompt">$ </span>ls ~
+<span class="output">  (your home directory — 5 GB quota)</span>
+
+<span class="prompt">$ </span>df -h /data/home
+<span class="output">Filesystem      Size  Used Avail Use% Mounted on</span>
+<span class="output">pasteur:/data/home   14T  ...  ...  ...  /data/home</span></code><span class="cmd-label">pasteur-login</span></pre>
+
+      <p>Your storage spans three areas. See the <a href="storage.html">Storage Layout</a> page for details on each:</p>
+      <ul>
+        <li><code>/data/home/your-username</code> — personal home directory</li>
+        <li><code>/data/scratch/your-username</code> — fast temporary workspace</li>
+        <li><code>/data/shared/</code> — shared project data and containers</li>
+      </ul>
+
+      <!-- Verify Slurm -->
+      <h2>Step 4 — Verify Slurm Access</h2>
+      <p>Check that you can see the Slurm cluster and your account:</p>
+
+      <pre><code><span class="comment"># Check cluster status</span>
+<span class="prompt">$ </span>sinfo
+<span class="output">PARTITION  AVAIL  TIMELIMIT  NODES  STATE  NODELIST</span>
+<span class="output">debug*        up   1:00:00      1   idle   pasteur</span>
+<span class="output">standard      up  2-00:00:00   1   idle   pasteur</span>
+<span class="output">extended      up  7-00:00:00   1   idle   pasteur</span>
+
+<span class="comment"># Check your account limits</span>
+<span class="prompt">$ </span>sacctmgr show assoc user=$(whoami) format=user,partition,qos,maxgres -p
+<span class="output">User|Partition|QOS|MaxGRES|</span>
+<span class="output">your-username||normal||</span></code><span class="cmd-label">pasteur-login</span></pre>
+
+      <!-- Quick test job -->
+      <h2>Step 5 — Run a Test Job</h2>
+      <p>Submit a simple test job to verify your setup is working end-to-end:</p>
+
+      <pre><code><span class="comment"># Submit an interactive test job</span>
+<span class="prompt">$ </span>srun <span class="flag">--partition</span>=debug <span class="flag">--time</span>=00:05:00 <span class="flag">--pty</span> bash
+
+<span class="comment"># Inside the job — you are now on the compute node</span>
+<span class="prompt">$ </span>hostname
+<span class="output">pasteur</span>
+
+<span class="prompt">$ </span>echo "Hello from the compute node!"
+<span class="output">Hello from the compute node!</span>
+
+<span class="prompt">$ </span>exit   <span class="comment"># exit the interactive session</span></code><span class="cmd-label">pasteur-login</span></pre>
+
+      <p>Or submit a batch job:</p>
+
+      <pre><code><span class="comment"># Create a simple test script</span>
+<span class="prompt">$ </span>cat > test_job.sh &lt;&lt; 'EOF'
+<span class="kw">#!/bin/bash</span>
+<span class="flag">#SBATCH --job-name</span>=test
+<span class="flag">#SBATCH --partition</span>=debug
+<span class="flag">#SBATCH --time</span>=00:02:00
+<span class="flag">#SBATCH --output</span>=test_%j.out
+
+echo "Job ID: $SLURM_JOB_ID"
+echo "Running on: $(hostname)"
+echo "Date: $(date)"
+EOF
+
+<span class="comment"># Submit it</span>
+<span class="prompt">$ </span>sbatch test_job.sh
+<span class="output">Submitted batch job 42</span>
+
+<span class="comment"># Check its status</span>
+<span class="prompt">$ </span>squeue -u $(whoami)
+<span class="output">  JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST</span>
+<span class="output">     42     debug     test username  R       0:03      1 pasteur</span>
+
+<span class="comment"># View the output once it completes</span>
+<span class="prompt">$ </span>cat test_42.out
+<span class="output">Job ID: 42</span>
+<span class="output">Running on: pasteur</span>
+<span class="output">Date: Thu Mar 26 12:34:56 UTC 2026</span></code><span class="cmd-label">pasteur-login</span></pre>
+
+      <!-- Next steps -->
+      <h2>Next Steps</h2>
+      <div class="quick-links">
+        <a class="quick-link" href="storage.html">
+          <span class="ql-icon">◈</span>
+          <span class="ql-title">Storage Layout</span>
+          <span class="ql-desc">Learn where to put your data and scripts</span>
+        </a>
+        <a class="quick-link" href="slurm.html">
+          <span class="ql-icon">⚙</span>
+          <span class="ql-title">Slurm &amp; Scheduling</span>
+          <span class="ql-desc">Submit real jobs, use partitions and QOS</span>
+        </a>
+        <a class="quick-link" href="software.html">
+          <span class="ql-icon">⬡</span>
+          <span class="ql-title">Software Stack</span>
+          <span class="ql-desc">Set up conda environments and containers</span>
+        </a>
+      </div>
+
+    </div><!-- /content -->
+    <footer class="page-footer">
+      <span>pasteur — CASL HPC Cluster Documentation</span>
+      <span>Maintained by CASL Admins</span>
+    </footer>
+  </div>
+</div>
+<script src="js/main.js"></script>
+</body>
+</html>

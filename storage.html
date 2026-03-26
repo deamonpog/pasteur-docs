@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Storage Layout — pasteur</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="layout">
+
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="cluster-name">pasteur</div>
+      <div class="subtitle">CASL HPC Cluster</div>
+      <div class="org-tag">CASL &bull; Complex Adaptive Systems Lab</div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-label">Overview</div>
+        <a class="nav-link" href="index.html"><span class="icon">⌂</span> Home</a>
+        <a class="nav-link" href="getting-started.html"><span class="icon">▶</span> Getting Started</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">Storage</div>
+        <a class="nav-link" href="storage.html"><span class="icon">◈</span> Storage Layout</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">Jobs</div>
+        <a class="nav-link" href="slurm.html"><span class="icon">⚙</span> Slurm &amp; Scheduling</a>
+        <a class="nav-link" href="gpu-jobs.html"><span class="icon">▣</span> GPU Jobs</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">Software</div>
+        <a class="nav-link" href="software.html"><span class="icon">⬡</span> Software Stack</a>
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="version">v1.0 &mdash; pasteur</div>
+      <div style="margin-top:4px;">Ubuntu 24.04 LTS &bull; Slurm</div>
+    </div>
+  </nav>
+
+  <div class="overlay" id="overlay"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="hamburger" id="hamburger">☰</button>
+        <div class="topbar-breadcrumb">pasteur / <span>Storage Layout</span></div>
+      </div>
+      <div class="topbar-right">
+        <span class="badge badge-green">● Online</span>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="page-header">
+        <h1>Storage Layout</h1>
+        <p class="lead">All user data lives under <code>/data</code> — a 14 TB drive on the compute node, exported via NFS and mounted on pasteur-login. Understand where to put your files before you start.</p>
+        <div class="meta">
+          <span class="badge chip chip-amber">14 TB total</span>
+          <span class="badge chip chip-blue">NFS shared</span>
+        </div>
+      </div>
+
+      <!-- Filesystem tree -->
+      <h2>Directory Structure</h2>
+
+      <div class="fs-tree">
+<span class="dir">/data/</span>                            <span class="desc">← 14 TB, NFS root (on pasteur)</span>
+<span class="tree">├── </span><span class="dir">home/</span>                         <span class="mount">NFS → /data/home on pasteur-login</span>
+<span class="tree">│   └── </span><span class="dir">&lt;username&gt;/</span>               <span class="desc">← your home directory (5 GB)</span>
+<span class="tree">├── </span><span class="dir">scratch/</span>                      <span class="mount">NFS → /data/scratch on pasteur-login</span>
+<span class="tree">│   └── </span><span class="dir">&lt;username&gt;/</span>               <span class="desc">← fast temp workspace (part of 70 GB quota)</span>
+<span class="tree">├── </span><span class="dir">apps/</span>                         <span class="mount">NFS → /data/apps on pasteur-login</span>
+<span class="tree">│   ├── </span><span class="dir">casl/common/</span>              <span class="desc">← shared conda envs (managed by admins)</span>
+<span class="tree">│   └── </span><span class="dir">&lt;username&gt;/</span>               <span class="desc">← per-user app installs (conda envs etc.)</span>
+<span class="tree">└── </span><span class="dir">shared/</span>                       <span class="mount">NFS → /data/shared on pasteur-login</span>
+<span class="tree">    ├── </span><span class="dir">containers/</span>               <span class="desc">← shared Apptainer images (.sif)</span>
+<span class="tree">    └── </span><span class="dir">projects/</span>                 <span class="desc">← collaborative research data</span>
+      </div>
+
+      <!-- Quota table -->
+      <h2>Quotas</h2>
+      <p>Each regular lab user has a combined quota of <strong>70 GB</strong> across their home, scratch, and apps directories. This is enforced at the filesystem level.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>User Type</th>
+              <th>Quota</th>
+              <th>Scope</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Lab user</td>
+              <td><span class="chip chip-amber">70 GB</span></td>
+              <td>Combined per user</td>
+              <td>Across home + scratch + apps/<code>&lt;user&gt;</code></td>
+            </tr>
+            <tr>
+              <td>Admin (<code>casl-maintainer</code>)</td>
+              <td><span class="chip chip-green">100 GB group</span></td>
+              <td>Group quota</td>
+              <td><code>arachchige</code>, <code>igaribay</code></td>
+            </tr>
+            <tr>
+              <td>Shared dirs</td>
+              <td><span class="chip chip-blue">Unlimited</span></td>
+              <td>Shared project storage</td>
+              <td><code>/data/shared/</code>, <code>/data/apps/casl/</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Check your current usage:</p>
+      <pre><code><span class="prompt">$ </span>quota -s
+<span class="output">Disk quotas for user jsmith (uid 1002):</span>
+<span class="output">  Filesystem   space   quota   limit   grace   files   quota   limit   grace</span>
+<span class="output">pasteur:/data   12G    70G    75G</span></code><span class="cmd-label">pasteur-login</span></pre>
+
+      <!-- Home dir -->
+      <h2>Home Directory — <code>/data/home/&lt;username&gt;</code></h2>
+      <p>Your personal home directory. This is where your shell config files, scripts, and important outputs should live. It is accessible from both pasteur-login and the compute node.</p>
+      <ul>
+        <li><strong>Quota:</strong> 5 GB (hard limit)</li>
+        <li><strong>Backed up:</strong> No — store important data here but be aware there is no automated backup</li>
+        <li><strong>Accessible from:</strong> pasteur-login and pasteur (compute)</li>
+        <li><strong>Good for:</strong> Shell configs, job scripts, small outputs, code repositories</li>
+      </ul>
+
+      <div class="callout callout-warning">
+        <span class="callout-icon">⚠</span>
+        <div class="callout-body">
+          <strong>5 GB is not much</strong>
+          Keep large datasets and model checkpoints in scratch or shared/projects, not in your home directory. Your home directory filling up will cause login failures.
+        </div>
+      </div>
+
+      <!-- Scratch -->
+      <h2>Scratch — <code>/data/scratch/&lt;username&gt;</code></h2>
+      <p>High-throughput temporary workspace intended for active job I/O. Use scratch for data that a running job reads and writes — it counts against your 70 GB combined quota.</p>
+      <ul>
+        <li><strong>Quota:</strong> Counts toward your 70 GB combined limit</li>
+        <li><strong>Backed up:</strong> <strong style="color:var(--red);">No — not backed up at all</strong></li>
+        <li><strong>Accessible from:</strong> pasteur-login and pasteur (compute)</li>
+        <li><strong>Good for:</strong> Intermediate job outputs, large input datasets during an active experiment, model training checkpoints in progress</li>
+      </ul>
+
+      <div class="callout callout-danger">
+        <span class="callout-icon">✕</span>
+        <div class="callout-body">
+          <strong>Scratch is not permanent storage</strong>
+          Files in scratch may be purged by admins if space is needed. Move important results to your home directory or shared project storage as soon as a job completes.
+        </div>
+      </div>
+
+      <pre><code><span class="comment"># Use your scratch directory in job scripts</span>
+<span class="kw">#!/bin/bash</span>
+<span class="flag">#SBATCH --job-name</span>=my_experiment
+
+SCRATCH=<span class="str">/data/scratch/$USER</span>
+mkdir -p $SCRATCH/my_experiment_${SLURM_JOB_ID}
+
+<span class="comment"># Copy input data to scratch</span>
+cp <span class="str">/data/shared/projects/myproject/input.tar.gz</span> $SCRATCH/
+
+<span class="comment"># ... run your job ...</span>
+
+<span class="comment"># Copy important results back</span>
+cp -r $SCRATCH/results/ <span class="str">/data/home/$USER/completed/</span></code><span class="cmd-label">bash</span></pre>
+
+      <!-- Apps -->
+      <h2>Apps — <code>/data/apps/</code></h2>
+      <p>Software installations — primarily conda environments. There are two sub-areas:</p>
+      <ul>
+        <li><code>/data/apps/casl/common/</code> — <strong>shared environments</strong> managed by admins, available to all users</li>
+        <li><code>/data/apps/&lt;username&gt;/</code> — <strong>personal environments</strong> you install yourself using <code>mamba</code></li>
+      </ul>
+
+      <pre><code><span class="comment"># Create a personal conda environment in apps</span>
+<span class="prompt">$ </span>mamba create <span class="flag">--prefix</span> /data/apps/$USER/my-env python=3.11
+
+<span class="comment"># Activate it</span>
+<span class="prompt">$ </span>conda activate /data/apps/$USER/my-env
+
+<span class="comment"># Or use it in a Slurm job script</span>
+source /opt/miniforge3/etc/profile.d/conda.sh
+conda activate /data/apps/$USER/my-env</code><span class="cmd-label">bash</span></pre>
+
+      <!-- Shared -->
+      <h2>Shared — <code>/data/shared/</code></h2>
+      <p>Collaborative storage for the whole lab. Writable by members of the <code>casl-maintainer</code> group; readable by all users.</p>
+      <ul>
+        <li><code>/data/shared/containers/</code> — shared Apptainer <code>.sif</code> images (see <a href="software.html">Software Stack</a>)</li>
+        <li><code>/data/shared/projects/</code> — collaborative research datasets</li>
+      </ul>
+
+      <!-- Best practices -->
+      <h2>Best Practices</h2>
+      <div class="card">
+        <div class="table-wrap" style="margin:0;">
+          <table>
+            <thead><tr><th>Use case</th><th>Recommended location</th></tr></thead>
+            <tbody>
+              <tr><td>Job scripts &amp; code</td><td><code>/data/home/&lt;user&gt;</code></td></tr>
+              <tr><td>Input datasets for a running job</td><td><code>/data/scratch/&lt;user&gt;</code></td></tr>
+              <tr><td>Completed experiment results</td><td><code>/data/home/&lt;user&gt;</code></td></tr>
+              <tr><td>Large shared datasets</td><td><code>/data/shared/projects/</code></td></tr>
+              <tr><td>Conda environments (personal)</td><td><code>/data/apps/&lt;user&gt;/</code></td></tr>
+              <tr><td>Apptainer container images</td><td><code>/data/shared/containers/</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+    <footer class="page-footer">
+      <span>pasteur — CASL HPC Cluster Documentation</span>
+      <span>Maintained by CASL Admins</span>
+    </footer>
+  </div>
+</div>
+<script src="js/main.js"></script>
+</body>
+</html>

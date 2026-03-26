@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GPU Jobs — pasteur</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="layout">
+
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="cluster-name">pasteur</div>
+      <div class="subtitle">CASL HPC Cluster</div>
+      <div class="org-tag">CASL &bull; Complex Adaptive Systems Lab</div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-label">Overview</div>
+        <a class="nav-link" href="index.html"><span class="icon">⌂</span> Home</a>
+        <a class="nav-link" href="getting-started.html"><span class="icon">▶</span> Getting Started</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">Storage</div>
+        <a class="nav-link" href="storage.html"><span class="icon">◈</span> Storage Layout</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">Jobs</div>
+        <a class="nav-link" href="slurm.html"><span class="icon">⚙</span> Slurm &amp; Scheduling</a>
+        <a class="nav-link" href="gpu-jobs.html"><span class="icon">▣</span> GPU Jobs</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">Software</div>
+        <a class="nav-link" href="software.html"><span class="icon">⬡</span> Software Stack</a>
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="version">v1.0 &mdash; pasteur</div>
+      <div style="margin-top:4px;">Ubuntu 24.04 LTS &bull; Slurm</div>
+    </div>
+  </nav>
+
+  <div class="overlay" id="overlay"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="hamburger" id="hamburger">☰</button>
+        <div class="topbar-breadcrumb">pasteur / <span>GPU Jobs</span></div>
+      </div>
+      <div class="topbar-right">
+        <span class="badge badge-green">● Online</span>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="page-header">
+        <h1>GPU Jobs</h1>
+        <p class="lead">pasteur is equipped with 8 × NVIDIA H200 GPUs, managed by Slurm with full cgroup-based isolation. Each job sees only the GPUs it was allocated — no accidental sharing or VRAM conflicts.</p>
+        <div class="meta">
+          <span class="badge chip chip-amber">8 × NVIDIA H200</span>
+          <span class="badge chip chip-green">cgroup isolated</span>
+          <span class="badge chip chip-blue">NVLink</span>
+        </div>
+      </div>
+
+      <!-- GPU hardware -->
+      <h2>GPU Hardware</h2>
+      <div class="card-grid">
+        <div class="spec-card">
+          <div class="spec-label">GPU Model</div>
+          <div class="spec-value" style="font-size:18px;">H200</div>
+          <div class="spec-sub">NVIDIA Hopper Architecture</div>
+        </div>
+        <div class="spec-card">
+          <div class="spec-label">Count</div>
+          <div class="spec-value">8</div>
+          <div class="spec-sub">Total on pasteur node</div>
+        </div>
+        <div class="spec-card">
+          <div class="spec-label">Isolation</div>
+          <div class="spec-value" style="font-size:16px;">cgroups</div>
+          <div class="spec-sub">Hard device-level isolation</div>
+        </div>
+      </div>
+
+      <!-- Default limit -->
+      <h2>Default GPU Limit</h2>
+      <p>By default, every user can request <strong>up to 1 GPU per job</strong>. This is enforced by the <code>normal</code> QOS. You must explicitly request a higher QOS to access more GPUs.</p>
+
+      <div class="callout callout-warning">
+        <span class="callout-icon">⚠</span>
+        <div class="callout-body">
+          <strong>You must always explicitly request GPUs</strong>
+          GPUs are never allocated automatically. If you don't include <code>--gres=gpu:N</code> in your job script, your job won't see any GPUs — even if they're idle.
+        </div>
+      </div>
+
+      <!-- Single GPU -->
+      <h2>Single GPU Job (default)</h2>
+      <p>Available to all users under the default <code>normal</code> QOS:</p>
+
+      <pre><code><span class="kw">#!/bin/bash</span>
+<span class="flag">#SBATCH --job-name</span>=train_model
+<span class="flag">#SBATCH --partition</span>=standard
+<span class="flag">#SBATCH --time</span>=24:00:00
+<span class="flag">#SBATCH --cpus-per-task</span>=16
+<span class="flag">#SBATCH --mem</span>=64G
+<span class="flag">#SBATCH --gres</span>=gpu:1                  <span class="comment"># Request 1 GPU (default QOS supports this)</span>
+<span class="flag">#SBATCH --output</span>=%x_%j.out
+
+source /opt/miniforge3/etc/profile.d/conda.sh
+conda activate /data/apps/$USER/my-env
+
+<span class="comment"># Verify GPU is visible</span>
+nvidia-smi
+
+python train.py --device cuda</code><span class="cmd-label">gpu_job.sh</span></pre>
+
+      <!-- Multi-GPU -->
+      <h2>Multi-GPU Jobs</h2>
+      <p>To request more than 1 GPU, you need the corresponding QOS. Contact an admin to have it added to your account. Then use <strong>both</strong> <code>--gres</code> and <code>--qos</code>:</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>GPUs needed</th>
+              <th>QOS flag</th>
+              <th>Who has access</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td><code>--qos=normal</code> (default, can omit)</td>
+              <td>Everyone</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td><code>--qos=elevated</code></td>
+              <td>On request</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td><code>--qos=high</code></td>
+              <td>On request</td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td><code>--qos=multigpu</code></td>
+              <td>On request</td>
+            </tr>
+            <tr>
+              <td>8 (full node)</td>
+              <td><code>--qos=multigpu_full</code></td>
+              <td>Admin approval required</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Example — 4-GPU PyTorch DDP job</h3>
+      <pre><code><span class="kw">#!/bin/bash</span>
+<span class="flag">#SBATCH --job-name</span>=ddp_train
+<span class="flag">#SBATCH --partition</span>=standard
+<span class="flag">#SBATCH --time</span>=48:00:00
+<span class="flag">#SBATCH --cpus-per-task</span>=32
+<span class="flag">#SBATCH --mem</span>=256G
+<span class="flag">#SBATCH --gres</span>=gpu:4                  <span class="comment"># Request 4 GPUs</span>
+<span class="flag">#SBATCH --qos</span>=high                    <span class="comment"># QOS must permit N GPUs</span>
+<span class="flag">#SBATCH --output</span>=%x_%j.out
+
+source /opt/miniforge3/etc/profile.d/conda.sh
+conda activate /data/apps/$USER/torch-env
+
+<span class="comment"># PyTorch DDP launch</span>
+torchrun \
+    <span class="flag">--standalone</span> \
+    <span class="flag">--nproc_per_node</span>=4 \
+    train_ddp.py \
+        <span class="flag">--batch-size</span>=512 \
+        <span class="flag">--epochs</span>=100</code><span class="cmd-label">ddp_job.sh</span></pre>
+
+      <h3>Example — 6-GPU job with multigpu QOS</h3>
+      <pre><code><span class="kw">#!/bin/bash</span>
+<span class="flag">#SBATCH --gres</span>=gpu:6
+<span class="flag">#SBATCH --qos</span>=multigpu
+<span class="comment"># ... other SBATCH options ...</span>
+
+torchrun <span class="flag">--nproc_per_node</span>=6 train.py</code><span class="cmd-label">multigpu_job.sh</span></pre>
+
+      <!-- GPU isolation -->
+      <h2>GPU Isolation</h2>
+      <p>Slurm uses <strong>cgroups</strong> to enforce device-level GPU isolation. When your job is allocated GPU 2, only GPU 2 appears in <code>nvidia-smi</code> inside your job — you cannot accidentally use another user's GPU.</p>
+
+      <pre><code><span class="comment"># Inside a job with --gres=gpu:1, only your GPU is visible</span>
+<span class="prompt">$ </span>nvidia-smi
+<span class="output">+-------------------------------------------------------------------------------+</span>
+<span class="output">| NVIDIA-SMI ...    Driver Version: ...    CUDA Version: ...                    |</span>
+<span class="output">|------------------------------|----------------------|------------------------+</span>
+<span class="output">| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC  |</span>
+<span class="output">|   0  NVIDIA H200         On   | 00000000:XX:00.0 Off |                 0     |</span>
+<span class="output">+------------------------------+----------------------+------------------------+</span>
+<span class="comment"># Only 1 GPU shown, even though the node has 8 — cgroup isolation works.</span>
+
+<span class="comment"># CUDA_VISIBLE_DEVICES is also set automatically</span>
+<span class="prompt">$ </span>echo $CUDA_VISIBLE_DEVICES
+<span class="output">2</span>   <span class="comment"># (whichever physical GPU was allocated)</span></code><span class="cmd-label">pasteur</span></pre>
+
+      <!-- Monitoring GPU jobs -->
+      <h2>Monitoring GPU Jobs</h2>
+
+      <pre><code><span class="comment"># Check GPU utilization while job is running</span>
+<span class="comment"># (from pasteur-login, watching your job)</span>
+<span class="prompt">$ </span>srun <span class="flag">--jobid</span>=101 <span class="flag">--pty</span> nvidia-smi dmon -s u
+
+<span class="comment"># After job completes, see GPU memory used</span>
+<span class="prompt">$ </span>sacct <span class="flag">-j</span> 101 <span class="flag">--format</span>=JobID,MaxRSS,ReqGRES,AllocGRES</code><span class="cmd-label">pasteur-login</span></pre>
+
+      <!-- PyTorch / TF tips -->
+      <h2>Framework Tips</h2>
+
+      <h3>PyTorch</h3>
+      <pre><code><span class="kw">import</span> torch
+
+<span class="comment"># Verify GPU is available</span>
+print(torch.cuda.is_available())        <span class="comment"># True</span>
+print(torch.cuda.device_count())        <span class="comment"># = number of GPUs allocated</span>
+print(torch.cuda.get_device_name(0))    <span class="comment"># NVIDIA H200</span>
+
+device = torch.device(<span class="str">"cuda"</span> <span class="kw">if</span> torch.cuda.is_available() <span class="kw">else</span> <span class="str">"cpu"</span>)
+model = MyModel().to(device)</code><span class="cmd-label">python</span></pre>
+
+      <h3>TensorFlow</h3>
+      <pre><code><span class="kw">import</span> tensorflow <span class="kw">as</span> tf
+
+<span class="comment"># List available GPUs</span>
+gpus = tf.config.list_physical_devices(<span class="str">"GPU"</span>)
+print(<span class="str">f"GPUs available: {len(gpus)}"</span>)  <span class="comment"># = your allocated count</span>
+
+<span class="comment"># Enable memory growth (recommended)</span>
+<span class="kw">for</span> gpu <span class="kw">in</span> gpus:
+    tf.config.experimental.set_memory_growth(gpu, <span class="kw">True</span>)</code><span class="cmd-label">python</span></pre>
+
+      <!-- Request elevated QOS -->
+      <h2>Requesting Elevated QOS</h2>
+      <div class="callout callout-info">
+        <span class="callout-icon">ℹ</span>
+        <div class="callout-body">
+          <strong>How to request multi-GPU access</strong>
+          Email or message the lab admins with: (1) the QOS level you need, (2) the scientific justification for needing multiple GPUs, and (3) an estimate of how long you'll need the elevated access. Admins can add QOS to your account while the cluster is running — no downtime required.
+        </div>
+      </div>
+
+    </div>
+    <footer class="page-footer">
+      <span>pasteur — CASL HPC Cluster Documentation</span>
+      <span>Maintained by CASL Admins</span>
+    </footer>
+  </div>
+</div>
+<script src="js/main.js"></script>
+</body>
+</html>

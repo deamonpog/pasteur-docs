@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slurm &amp; Scheduling — pasteur</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="layout">
+
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="cluster-name">pasteur</div>
+      <div class="subtitle">CASL HPC Cluster</div>
+      <div class="org-tag">CASL &bull; Complex Adaptive Systems Lab</div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-label">Overview</div>
+        <a class="nav-link" href="index.html"><span class="icon">⌂</span> Home</a>
+        <a class="nav-link" href="getting-started.html"><span class="icon">▶</span> Getting Started</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">Storage</div>
+        <a class="nav-link" href="storage.html"><span class="icon">◈</span> Storage Layout</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">Jobs</div>
+        <a class="nav-link" href="slurm.html"><span class="icon">⚙</span> Slurm &amp; Scheduling</a>
+        <a class="nav-link" href="gpu-jobs.html"><span class="icon">▣</span> GPU Jobs</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">Software</div>
+        <a class="nav-link" href="software.html"><span class="icon">⬡</span> Software Stack</a>
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="version">v1.0 &mdash; pasteur</div>
+      <div style="margin-top:4px;">Ubuntu 24.04 LTS &bull; Slurm</div>
+    </div>
+  </nav>
+
+  <div class="overlay" id="overlay"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="hamburger" id="hamburger">☰</button>
+        <div class="topbar-breadcrumb">pasteur / <span>Slurm &amp; Scheduling</span></div>
+      </div>
+      <div class="topbar-right">
+        <span class="badge badge-green">● Online</span>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="page-header">
+        <h1>Slurm &amp; Scheduling</h1>
+        <p class="lead">pasteur uses Slurm Workload Manager to schedule and manage compute jobs. All resource-intensive work must be submitted through Slurm — never run heavy jobs on the login node.</p>
+        <div class="meta">
+          <span class="badge chip chip-amber">3 Partitions</span>
+          <span class="badge chip chip-blue">5 QOS Levels</span>
+        </div>
+      </div>
+
+      <!-- Partitions -->
+      <h2>Partitions</h2>
+      <p>Choose your partition based on how long your job needs to run. The <strong>standard</strong> partition is the default for most workloads.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Partition</th>
+              <th>Time Limit</th>
+              <th>Default?</th>
+              <th>Use Case</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>debug</code></td>
+              <td><span class="chip chip-green">1 hour</span></td>
+              <td>No</td>
+              <td>Quick tests, interactive sessions, script debugging</td>
+            </tr>
+            <tr>
+              <td><code>standard</code></td>
+              <td><span class="chip chip-amber">48 hours</span></td>
+              <td><strong>Yes</strong></td>
+              <td>Most research workloads — model training, experiments</td>
+            </tr>
+            <tr>
+              <td><code>extended</code></td>
+              <td><span class="chip chip-red">7 days</span></td>
+              <td>No</td>
+              <td>Long-running jobs requiring more than 48 hours</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-info">
+        <span class="callout-icon">ℹ</span>
+        <div class="callout-body">
+          <strong>Always use the debug partition for testing</strong>
+          Use <code>--partition=debug</code> when you're testing a new job script. It has a short time limit which makes it a quick feedback loop. Move to <code>standard</code> only when you're confident the script is correct.
+        </div>
+      </div>
+
+      <!-- QOS -->
+      <h2>QOS Levels</h2>
+      <p>Quality of Service (QOS) controls what resources your job can use. Your default QOS is <strong>normal</strong>, which limits you to 1 GPU per job. Contact an admin to request elevated QOS.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>QOS</th>
+              <th>Max GPUs</th>
+              <th>Description</th>
+              <th>Who gets it</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>normal</code></td>
+              <td><span class="chip chip-green">1 GPU</span></td>
+              <td>Default for all users</td>
+              <td>Everyone</td>
+            </tr>
+            <tr>
+              <td><code>elevated</code></td>
+              <td><span class="chip chip-blue">2 GPUs</span></td>
+              <td>Elevated single-user priority</td>
+              <td>On request</td>
+            </tr>
+            <tr>
+              <td><code>high</code></td>
+              <td><span class="chip chip-blue">4 GPUs</span></td>
+              <td>High priority workloads</td>
+              <td>On request</td>
+            </tr>
+            <tr>
+              <td><code>multigpu</code></td>
+              <td><span class="chip chip-amber">6 GPUs</span></td>
+              <td>Multi-GPU training runs</td>
+              <td>On request</td>
+            </tr>
+            <tr>
+              <td><code>multigpu_full</code></td>
+              <td><span class="chip chip-red">8 GPUs</span></td>
+              <td>Full-node GPU allocation</td>
+              <td>Admin approval only</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Job submission -->
+      <h2>Submitting Jobs</h2>
+
+      <h3>Batch job — sbatch</h3>
+      <p>The most common way to run jobs. Write a script with <code>#SBATCH</code> directives, then submit:</p>
+
+      <pre><code><span class="kw">#!/bin/bash</span>
+<span class="comment">#============================================================</span>
+<span class="comment"># Slurm job script template for pasteur</span>
+<span class="comment">#============================================================</span>
+<span class="flag">#SBATCH --job-name</span>=my_experiment      <span class="comment"># Job name</span>
+<span class="flag">#SBATCH --partition</span>=standard          <span class="comment"># Partition (debug/standard/extended)</span>
+<span class="flag">#SBATCH --time</span>=12:00:00              <span class="comment"># Wall time (HH:MM:SS)</span>
+<span class="flag">#SBATCH --ntasks</span>=1                   <span class="comment"># Number of tasks</span>
+<span class="flag">#SBATCH --cpus-per-task</span>=8           <span class="comment"># CPUs per task</span>
+<span class="flag">#SBATCH --mem</span>=64G                    <span class="comment"># RAM</span>
+<span class="flag">#SBATCH --output</span>=%x_%j.out          <span class="comment"># Stdout log (%x=name, %j=job ID)</span>
+<span class="flag">#SBATCH --error</span>=%x_%j.err           <span class="comment"># Stderr log</span>
+<span class="flag">#SBATCH --mail-type</span>=END,FAIL        <span class="comment"># Email on completion/failure</span>
+<span class="flag">#SBATCH --mail-user</span>=you@university.edu
+
+<span class="comment"># ── Environment ──────────────────────────────</span>
+source /opt/miniforge3/etc/profile.d/conda.sh
+conda activate /data/apps/$USER/my-env
+
+<span class="comment"># ── Work ─────────────────────────────────────</span>
+echo "Starting job $SLURM_JOB_ID at $(date)"
+echo "Running on: $(hostname)"
+
+python my_script.py \
+    --input /data/scratch/$USER/input_data \
+    --output /data/home/$USER/results
+
+echo "Done at $(date)"</code><span class="cmd-label">job.sh</span></pre>
+
+      <pre><code><span class="comment"># Submit</span>
+<span class="prompt">$ </span>sbatch job.sh
+<span class="output">Submitted batch job 101</span></code><span class="cmd-label">pasteur-login</span></pre>
+
+      <h3>Interactive job — srun</h3>
+      <p>For interactive debugging or exploration:</p>
+
+      <pre><code><span class="comment"># Basic interactive shell on the compute node</span>
+<span class="prompt">$ </span>srun <span class="flag">--partition</span>=debug <span class="flag">--time</span>=01:00:00 <span class="flag">--cpus-per-task</span>=4 <span class="flag">--mem</span>=16G <span class="flag">--pty</span> bash
+
+<span class="comment"># Interactive job with a GPU (requires appropriate QOS)</span>
+<span class="prompt">$ </span>srun <span class="flag">--partition</span>=debug <span class="flag">--gres</span>=gpu:1 <span class="flag">--time</span>=01:00:00 <span class="flag">--pty</span> bash</code><span class="cmd-label">pasteur-login</span></pre>
+
+      <!-- Monitoring -->
+      <h2>Monitoring Jobs</h2>
+
+      <pre><code><span class="comment"># View your jobs in the queue</span>
+<span class="prompt">$ </span>squeue -u $(whoami)
+<span class="output">  JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST</span>
+<span class="output">    101  standard   my_exp   jsmith  R    1:23:45      1 pasteur</span>
+<span class="output">    102     debug  test_run  jsmith PD       0:00      1 (None)</span>
+
+<span class="comment"># View all jobs (all users)</span>
+<span class="prompt">$ </span>squeue
+
+<span class="comment"># Detailed info about a specific job</span>
+<span class="prompt">$ </span>scontrol show job 101
+
+<span class="comment"># View cluster status</span>
+<span class="prompt">$ </span>sinfo
+
+<span class="comment"># Cancel a job</span>
+<span class="prompt">$ </span>scancel 101
+
+<span class="comment"># Cancel all your jobs</span>
+<span class="prompt">$ </span>scancel -u $(whoami)</code><span class="cmd-label">pasteur-login</span></pre>
+
+      <h3>Job states</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>State</th><th>Code</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td>Running</td><td><span class="chip chip-green">R</span></td><td>Job is actively running on the compute node</td></tr>
+            <tr><td>Pending</td><td><span class="chip chip-amber">PD</span></td><td>Waiting for resources to become available</td></tr>
+            <tr><td>Completing</td><td><span class="chip chip-blue">CG</span></td><td>Job finishing up, cleaning resources</td></tr>
+            <tr><td>Failed</td><td><span class="chip chip-red">F</span></td><td>Job ended with a non-zero exit code</td></tr>
+            <tr><td>Cancelled</td><td><span class="chip chip-red">CA</span></td><td>Job was manually cancelled</td></tr>
+            <tr><td>Timeout</td><td><span class="chip chip-red">TO</span></td><td>Job exceeded its wall time limit</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Job history -->
+      <h2>Job History &amp; Accounting</h2>
+      <pre><code><span class="comment"># View completed jobs</span>
+<span class="prompt">$ </span>sacct -u $(whoami) <span class="flag">--format</span>=JobID,JobName,Partition,State,Elapsed,CPUTime,MaxRSS
+
+<span class="comment"># View jobs from the last 7 days</span>
+<span class="prompt">$ </span>sacct -u $(whoami) <span class="flag">--starttime</span>=now-7days <span class="flag">--format</span>=JobID,JobName,State,Elapsed
+
+<span class="comment"># Check your current resource usage / QOS</span>
+<span class="prompt">$ </span>sacctmgr show assoc user=$(whoami) <span class="flag">withassoc</span> format=user,qos,maxgres -p</code><span class="cmd-label">pasteur-login</span></pre>
+
+      <!-- Tips -->
+      <h2>Tips &amp; Best Practices</h2>
+      <ul>
+        <li><strong>Test first in debug:</strong> Always run a shortened version of your job in <code>--partition=debug</code> before submitting a long job.</li>
+        <li><strong>Request only what you need:</strong> Asking for 384 CPUs and all 8 GPUs when you need 8 CPUs and 1 GPU wastes cluster resources and delays your job.</li>
+        <li><strong>Use <code>--mail-type=END,FAIL</code>:</strong> You'll get an email when your job finishes or fails — no need to keep checking.</li>
+        <li><strong>Check memory usage:</strong> After a job completes, review <code>MaxRSS</code> in <code>sacct</code> to calibrate your memory requests for future jobs.</li>
+        <li><strong>Name your outputs:</strong> Use <code>%x</code> (job name) and <code>%j</code> (job ID) in output file names so they don't overwrite each other.</li>
+      </ul>
+
+      <div class="callout callout-warning">
+        <span class="callout-icon">⚠</span>
+        <div class="callout-body">
+          <strong>Time limit = hard wall time</strong>
+          When your job's wall time runs out, Slurm kills it immediately — no cleanup, no save. If your experiment is long, implement checkpointing in your code, or request the <code>extended</code> partition.
+        </div>
+      </div>
+
+    </div>
+    <footer class="page-footer">
+      <span>pasteur — CASL HPC Cluster Documentation</span>
+      <span>Maintained by CASL Admins</span>
+    </footer>
+  </div>
+</div>
+<script src="js/main.js"></script>
+</body>
+</html>

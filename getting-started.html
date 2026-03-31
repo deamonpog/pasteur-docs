@@ -67,31 +67,24 @@
       <!-- Account -->
       <h2>Step 1 — Get an Account</h2>
       <p>Access to pasteur requires an account provisioned by a cluster administrator. Contact <strong>Dr. Garibay</strong> or the CASL lab admins to request access. Provide your preferred username and university affiliation.</p>
-      <div class="callout callout-info">
-        <span class="callout-icon">ℹ</span>
-        <div class="callout-body">
-          <strong>Username policy</strong>
-          Usernames, once created, cannot be reused if deleted. Choose carefully. Typically, your username matches your university NetID.
-        </div>
-      </div>
 
       <!-- SSH Access -->
       <h2>Step 2 — Connect via SSH</h2>
       <p>All user access is through the login node <strong>pasteur-login</strong>. You do not SSH directly to the compute node.</p>
 
-      <pre><code><span class="prompt">$ </span>ssh <span class="hl">your-username</span>@pasteur-login.your-university.edu
+      <pre><code><span class="prompt">$ </span>ssh <span class="hl">your-username</span>@10.196.20.50
 <span class="output">Welcome to pasteur-login (Ubuntu 24.04 LTS)</span>
 <span class="output">CASL HPC Cluster — Login Node</span>
 <span class="output">Do not run compute jobs on this node. Submit jobs via Slurm.</span></code><span class="cmd-label">bash</span></pre>
 
-      <p>Replace <code>your-username</code> with your cluster account name and <code>pasteur-login.your-university.edu</code> with the hostname provided by your admin.</p>
+      <p>Replace <code>your-username</code> with your cluster account name.</p>
 
       <h3>SSH Key Setup (Recommended)</h3>
       <p>Password authentication works but key-based authentication is faster and more secure. Generate a key pair on your local machine if you don't already have one:</p>
 
       <pre><code><span class="comment"># On your LOCAL machine</span>
 <span class="prompt">$ </span>ssh-keygen -t ed25519 -C "your-email@university.edu"
-<span class="prompt">$ </span>ssh-copy-id <span class="hl">your-username</span>@pasteur-login.your-university.edu</code><span class="cmd-label">local</span></pre>
+<span class="prompt">$ </span>ssh-copy-id <span class="hl">your-username</span>@10.196.20.50</code><span class="cmd-label">local</span></pre>
 
       <p>After this, SSH will authenticate automatically using your key.</p>
 
@@ -106,23 +99,21 @@
 
       <!-- Environment -->
       <h2>Step 3 — Explore Your Environment</h2>
-      <p>Once logged in to pasteur-login, your home directory lives on the NFS-shared <code>/data</code> filesystem:</p>
+      <p>Once logged in to pasteur-login, your home directory is NFS-mounted from the compute node:</p>
 
       <pre><code><span class="prompt">$ </span>pwd
-<span class="output">/data/home/your-username</span>
+<span class="output">/mnt/datahome/your-username</span>
 
-<span class="prompt">$ </span>ls ~
-<span class="output">  (your home directory — 5 GB quota)</span>
-
-<span class="prompt">$ </span>df -h /data/home
+<span class="prompt">$ </span>df -h /mnt/datahome
 <span class="output">Filesystem      Size  Used Avail Use% Mounted on</span>
-<span class="output">pasteur:/data/home   14T  ...  ...  ...  /data/home</span></code><span class="cmd-label">pasteur-login</span></pre>
+<span class="output">pasteur:/data/home   14T  ...  ...  ...  /mnt/datahome</span></code><span class="cmd-label">pasteur-login</span></pre>
 
-      <p>Your storage spans three areas. See the <a href="storage.html">Storage Layout</a> page for details on each:</p>
+      <p>Your storage spans several areas — the exact paths depend on which group you belong to. See the <a href="storage.html">Storage Layout</a> page for details:</p>
       <ul>
-        <li><code>/data/home/your-username</code> — personal home directory</li>
-        <li><code>/data/scratch/your-username</code> — fast temporary workspace</li>
-        <li><code>/data/shared/</code> — shared project data and containers</li>
+        <li><code>/mnt/datahome/your-username</code> — personal home directory</li>
+        <li><code>/scratch/&lt;group&gt;/your-username</code> — fast temporary workspace (not backed up)</li>
+        <li><code>/apps/&lt;group&gt;/your-username</code> — conda environments and personal software</li>
+        <li><code>/shared/&lt;project&gt;/</code> — shared project data and containers</li>
       </ul>
 
       <!-- Verify Slurm -->
@@ -132,8 +123,8 @@
       <pre><code><span class="comment"># Check cluster status</span>
 <span class="prompt">$ </span>sinfo
 <span class="output">PARTITION  AVAIL  TIMELIMIT  NODES  STATE  NODELIST</span>
-<span class="output">debug*        up   1:00:00      1   idle   pasteur</span>
-<span class="output">standard      up  2-00:00:00   1   idle   pasteur</span>
+<span class="output">debug         up   1:00:00      1   idle   pasteur</span>
+<span class="output">standard*     up  2-00:00:00   1   idle   pasteur</span>
 <span class="output">extended      up  7-00:00:00   1   idle   pasteur</span>
 
 <span class="comment"># Check your account limits</span>
@@ -210,7 +201,7 @@ EOF
     </div><!-- /content -->
     <footer class="page-footer">
       <span>pasteur — CASL HPC Cluster Documentation</span>
-      <span>Maintained by CASL Admins</span>
+      <span><a href="https://github.com/deamonpog" target="_blank">Chathura Jayalath</a> &bull; CASL Admins</span>
     </footer>
   </div>
 </div>

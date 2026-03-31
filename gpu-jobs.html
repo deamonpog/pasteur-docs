@@ -83,6 +83,11 @@
           <div class="spec-value" style="font-size:16px;">cgroups</div>
           <div class="spec-sub">Hard device-level isolation</div>
         </div>
+        <div class="spec-card">
+          <div class="spec-label">Interconnect</div>
+          <div class="spec-value" style="font-size:16px;">NVLink 4.0</div>
+          <div class="spec-sub">18 links &times; 26.562 GB/s per GPU</div>
+        </div>
       </div>
 
       <!-- Default limit -->
@@ -111,7 +116,7 @@
 <span class="flag">#SBATCH --output</span>=%x_%j.out
 
 source /opt/miniforge3/etc/profile.d/conda.sh
-conda activate /data/apps/$USER/my-env
+conda activate <span class="str">/data/apps/$(id -gn)/$USER/my-env</span>
 
 <span class="comment"># Verify GPU is visible</span>
 nvidia-smi
@@ -173,7 +178,7 @@ python train.py --device cuda</code><span class="cmd-label">gpu_job.sh</span></p
 <span class="flag">#SBATCH --output</span>=%x_%j.out
 
 source /opt/miniforge3/etc/profile.d/conda.sh
-conda activate /data/apps/$USER/torch-env
+conda activate <span class="str">/data/apps/$(id -gn)/$USER/torch-env</span>
 
 <span class="comment"># PyTorch DDP launch</span>
 torchrun \
@@ -257,7 +262,7 @@ print(<span class="str">f"GPUs available: {len(gpus)}"</span>)  <span class="com
     </div>
     <footer class="page-footer">
       <span>pasteur — CASL HPC Cluster Documentation</span>
-      <span>Maintained by CASL Admins</span>
+      <span><a href="https://github.com/deamonpog" target="_blank">Chathura Jayalath</a> &bull; CASL Admins</span>
     </footer>
   </div>
 </div>

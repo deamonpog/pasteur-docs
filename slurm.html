@@ -180,16 +180,17 @@
 <span class="flag">#SBATCH --mail-user</span>=you@university.edu
 
 <span class="comment"># ── Environment ──────────────────────────────</span>
+GROUP=<span class="str">$(id -gn)</span>
 source /opt/miniforge3/etc/profile.d/conda.sh
-conda activate /data/apps/$USER/my-env
+conda activate <span class="str">/data/apps/$GROUP/$USER/my-env</span>
 
 <span class="comment"># ── Work ─────────────────────────────────────</span>
 echo "Starting job $SLURM_JOB_ID at $(date)"
 echo "Running on: $(hostname)"
 
 python my_script.py \
-    --input /data/scratch/$USER/input_data \
-    --output /data/home/$USER/results
+    --input /data/scratch/$GROUP/$USER/input_data \
+    --output $HOME/results
 
 echo "Done at $(date)"</code><span class="cmd-label">job.sh</span></pre>
 
@@ -277,7 +278,7 @@ echo "Done at $(date)"</code><span class="cmd-label">job.sh</span></pre>
     </div>
     <footer class="page-footer">
       <span>pasteur — CASL HPC Cluster Documentation</span>
-      <span>Maintained by CASL Admins</span>
+      <span><a href="https://github.com/deamonpog" target="_blank">Chathura Jayalath</a> &bull; CASL Admins</span>
     </footer>
   </div>
 </div>

@@ -40,9 +40,9 @@ document.querySelectorAll('pre').forEach(pre => {
   btn.addEventListener('mouseenter', () => { btn.style.color = '#f0a63a'; });
   btn.addEventListener('mouseleave', () => { btn.style.color = '#6b7a99'; });
   btn.addEventListener('click', () => {
-    const text = pre.innerText
-      .replace(/^Copy\n?/, '')
-      .replace(/\n?bash$|\n?shell$/, '')
+    const clone = pre.cloneNode(true);
+    clone.querySelectorAll('.cmd-label, .copy-btn').forEach(el => el.remove());
+    const text = clone.innerText
       .replace(/^\$ /gm, '')
       .replace(/^# .+\n/gm, '')
       .trim();

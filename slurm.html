@@ -255,7 +255,7 @@ echo "Done at $(date)"</code><span class="cmd-label">job.sh</span></pre>
 <span class="prompt">$ </span>sacct -u $(whoami) <span class="flag">--starttime</span>=now-7days <span class="flag">--format</span>=JobID,JobName,State,Elapsed
 
 <span class="comment"># Check your current resource usage / QOS</span>
-<span class="prompt">$ </span>sacctmgr show assoc user=$(whoami) <span class="flag">withassoc</span> format=user,qos,maxgres -p</code><span class="cmd-label">pasteur-login</span></pre>
+<span class="prompt">$ </span>sacctmgr show assoc user=$(whoami) format=user,qos,maxgres -p</code><span class="cmd-label">pasteur-login</span></pre>
 
       <!-- Tips -->
       <h2>Tips &amp; Best Practices</h2>

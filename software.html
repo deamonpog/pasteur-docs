@@ -171,10 +171,10 @@ python train.py</code><span class="cmd-label">job.sh</span></pre>
       </div>
 
       <h3>Shared Container Library</h3>
-      <p>Pre-pulled containers may be stored under <code>/data/shared/</code>. Check there before pulling your own — common ML and scientific containers may already be available.</p>
+      <p>Pre-pulled containers are stored at <code>/data/shared/containers/</code>. Check there before pulling your own — common ML and scientific containers may already be available.</p>
 
-      <pre><code><span class="comment"># List shared areas</span>
-<span class="prompt">$ </span>ls /data/shared/</code><span class="cmd-label">pasteur-login</span></pre>
+      <pre><code><span class="comment"># List shared containers</span>
+<span class="prompt">$ </span>ls /data/shared/containers/</code><span class="cmd-label">pasteur-login</span></pre>
 
       <h3>Pulling Containers</h3>
       <pre><code><span class="comment"># Pull from Docker Hub — store in your apps dir</span>
@@ -273,7 +273,7 @@ From: nvcr.io/nvidia/pytorch:24.01-py3
             </tr>
             <tr>
               <td>Sharing a reproducible environment</td>
-              <td>Apptainer .sif in <code>/data/shared/</code> or <code>/data/apps/&lt;group&gt;/$USER/containers/</code></td>
+              <td>Apptainer .sif in <code>/data/shared/containers/</code> or <code>/data/apps/casl/$USER/containers/</code></td>
             </tr>
             <tr>
               <td>Quick prototype / exploration</td>

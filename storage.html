@@ -80,8 +80,9 @@
 <span class="tree">│       ├── </span><span class="dir">common/</span>                   <span class="desc">← shared conda envs (managed by admins)</span>
 <span class="tree">│       └── </span><span class="dir">&lt;username&gt;/</span>               <span class="desc">← your conda envs and personal software</span>
 <span class="tree">└── </span><span class="dir">shared/</span>                             <span class="mount">mounted on pasteur-login at /data/shared</span>
-<span class="tree">    ├── </span><span class="dir">archives/</span>                     <span class="desc">← shared archived data</span>
-<span class="tree">    └── </span><span class="dir">projects/</span>                     <span class="desc">← shared project datasets</span>
+<span class="tree">    ├── </span><span class="dir">containers/</span>                   <span class="desc">← shared Apptainer container images (.sif)</span>
+<span class="tree">    ├── </span><span class="dir">projects/</span>                     <span class="desc">← collaborative research datasets</span>
+<span class="tree">    └── </span><span class="dir">archives/</span>                     <span class="desc">← archived user data</span>
       </div>
 
       <div class="callout callout-info">
@@ -196,10 +197,11 @@ conda activate /data/apps/$(id -gn)/$USER/my-env</code><span class="cmd-label">b
 
       <!-- Shared -->
       <h2>Shared — <code>/data/shared/</code></h2>
-      <p>Read-only shared storage for the lab. Access is granted per project by an admin.</p>
+      <p>Shared storage for the lab. Access is granted per project by an admin.</p>
       <ul>
-        <li><code>/data/shared/archives/</code> — shared archived data</li>
-        <li><code>/data/shared/projects/</code> — shared project datasets</li>
+        <li><code>/data/shared/containers/</code> — shared Apptainer <code>.sif</code> images (admin-managed, read by all lab users)</li>
+        <li><code>/data/shared/projects/</code> — collaborative research datasets (readable and writable by all lab users)</li>
+        <li><code>/data/shared/archives/</code> — archived user data (admin access only)</li>
       </ul>
 
       <!-- Best practices -->
@@ -215,6 +217,7 @@ conda activate /data/apps/$(id -gn)/$USER/my-env</code><span class="cmd-label">b
               <tr><td>Shared project data</td><td><code>/data/shared/projects/</code></td></tr>
               <tr><td>Archived data</td><td><code>/data/shared/archives/</code></td></tr>
               <tr><td>Conda environments (personal)</td><td><code>/data/apps/&lt;group&gt;/&lt;user&gt;/</code></td></tr>
+              <tr><td>Apptainer container images</td><td><code>/data/shared/containers/</code> or <code>/data/apps/casl/&lt;user&gt;/containers/</code></td></tr>
             </tbody>
           </table>
         </div>

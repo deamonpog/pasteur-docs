@@ -57,7 +57,7 @@
     <div class="content">
       <div class="page-header">
         <h1>Storage Layout</h1>
-        <p class="lead">Storage lives on the compute node (pasteur) and is NFS-mounted on pasteur-login. Your paths depend on which group you belong to — your admin will tell you your group name.</p>
+        <p class="lead">All storage lives under <code>/data</code> on the compute node (pasteur) and is NFS-mounted at the same paths on pasteur-login — no path differences between interactive use and job scripts.</p>
         <div class="meta">
           <span class="badge chip chip-amber">14 TB total</span>
           <span class="badge chip chip-blue">NFS shared</span>
@@ -66,30 +66,29 @@
 
       <!-- Filesystem tree -->
       <h2>Directory Structure</h2>
-      <p>The following shows the paths as seen from <strong>pasteur-login</strong> (what you see when you log in):</p>
+      <p>The following paths are the same on both pasteur-login and the compute node (pasteur):</p>
 
       <div class="fs-tree">
-<span class="dir">/mnt/datahome/</span>                    <span class="desc">← home directories</span>
-<span class="tree">└── </span><span class="dir">&lt;username&gt;/</span>               <span class="desc">← your home directory</span>
-
-<span class="dir">/scratch/</span>
-<span class="tree">└── </span><span class="dir">&lt;group&gt;/</span>
-<span class="tree">    └── </span><span class="dir">&lt;username&gt;/</span>           <span class="desc">← fast temp workspace (not backed up)</span>
-
-<span class="dir">/apps/</span>
-<span class="tree">└── </span><span class="dir">&lt;group&gt;/</span>
-<span class="tree">    └── </span><span class="dir">&lt;username&gt;/</span>           <span class="desc">← your conda envs and personal software</span>
-
-<span class="dir">/shared/</span>
-<span class="tree">├── </span><span class="dir">archives/</span>                 <span class="desc">← shared archived data</span>
-<span class="tree">└── </span><span class="dir">projects/</span>                 <span class="desc">← shared project data</span>
+<span class="dir">/data/</span>                                    <span class="desc">← 14 TB, NFS root (on pasteur)</span>
+<span class="tree">├── </span><span class="dir">home/</span>                               <span class="mount">mounted on pasteur-login at /data/home</span>
+<span class="tree">│   └── </span><span class="dir">&lt;username&gt;/</span>                   <span class="desc">← your home directory ($HOME)</span>
+<span class="tree">├── </span><span class="dir">scratch/</span>                            <span class="mount">mounted on pasteur-login at /data/scratch</span>
+<span class="tree">│   └── </span><span class="dir">&lt;group&gt;/</span>
+<span class="tree">│       └── </span><span class="dir">&lt;username&gt;/</span>               <span class="desc">← fast temp workspace (not backed up)</span>
+<span class="tree">├── </span><span class="dir">apps/</span>                               <span class="mount">mounted on pasteur-login at /data/apps</span>
+<span class="tree">│   └── </span><span class="dir">&lt;group&gt;/</span>
+<span class="tree">│       ├── </span><span class="dir">common/</span>                   <span class="desc">← shared conda envs (managed by admins)</span>
+<span class="tree">│       └── </span><span class="dir">&lt;username&gt;/</span>               <span class="desc">← your conda envs and personal software</span>
+<span class="tree">└── </span><span class="dir">shared/</span>                             <span class="mount">mounted on pasteur-login at /data/shared</span>
+<span class="tree">    ├── </span><span class="dir">archives/</span>                     <span class="desc">← shared archived data</span>
+<span class="tree">    └── </span><span class="dir">projects/</span>                     <span class="desc">← shared project datasets</span>
       </div>
 
       <div class="callout callout-info">
         <span class="callout-icon">ℹ</span>
         <div class="callout-body">
           <strong>Your group name</strong>
-          The <code>&lt;group&gt;</code> in paths like <code>/scratch/&lt;group&gt;/&lt;username&gt;</code> is assigned when your account is created. It may be a lab name (e.g. <code>casl</code>) or a project name. Your admin will tell you your group.
+          The <code>&lt;group&gt;</code> in paths like <code>/data/scratch/&lt;group&gt;/&lt;username&gt;</code> is assigned when your account is created — it may be a lab name (e.g. <code>casl</code>) or a project name. Run <code>id -gn</code> to see yours.
         </div>
       </div>
 
@@ -112,13 +111,13 @@
               <td>Lab user</td>
               <td><span class="chip chip-amber">70 GB</span></td>
               <td>Combined per user</td>
-              <td>Across home + scratch + apps/<code>&lt;user&gt;</code></td>
+              <td>Across home + scratch + apps/<code>&lt;group&gt;/&lt;user&gt;</code></td>
             </tr>
             <tr>
               <td>Shared dirs</td>
               <td><span class="chip chip-blue">Unlimited</span></td>
               <td>Shared project storage</td>
-              <td><code>/shared/</code> — not counted against user quotas</td>
+              <td><code>/data/shared/</code> — not counted against user quotas</td>
             </tr>
           </tbody>
         </table>
@@ -131,7 +130,7 @@
 <span class="output">pasteur:/data   12G    70G    75G</span></code><span class="cmd-label">pasteur-login</span></pre>
 
       <!-- Home dir -->
-      <h2>Home Directory — <code>/mnt/datahome/&lt;username&gt;</code></h2>
+      <h2>Home Directory — <code>/data/home/&lt;username&gt;</code></h2>
       <p>Your personal home directory. This is where your shell config files, scripts, and important outputs should live. It is accessible from both pasteur-login and the compute node.</p>
       <ul>
         <li><strong>Quota:</strong> Counts toward your 70 GB combined quota (shared with scratch and apps/&lt;user&gt;)</li>
@@ -144,12 +143,12 @@
         <span class="callout-icon">⚠</span>
         <div class="callout-body">
           <strong>Your quota is shared across home, scratch, and apps</strong>
-          Large datasets or model checkpoints stored in your home directory eat into the same 70 GB pool as everything else. Keep bulky files in scratch or shared/projects — a full quota causes login failures.
+          Large datasets or model checkpoints stored in your home directory eat into the same 70 GB pool as everything else. Keep bulky files in <code>/data/scratch/</code> or <code>/data/shared/</code> — a full quota causes login failures.
         </div>
       </div>
 
       <!-- Scratch -->
-      <h2>Scratch — <code>/scratch/&lt;group&gt;/&lt;username&gt;</code></h2>
+      <h2>Scratch — <code>/data/scratch/&lt;group&gt;/&lt;username&gt;</code></h2>
       <p>High-throughput temporary workspace intended for active job I/O. Use scratch for data that a running job reads and writes — it counts against your 70 GB combined quota.</p>
       <ul>
         <li><strong>Quota:</strong> Counts toward your 70 GB combined limit</li>
@@ -169,7 +168,6 @@
       <pre><code><span class="kw">#!/bin/bash</span>
 <span class="flag">#SBATCH --job-name</span>=my_experiment
 
-<span class="comment"># Paths inside a Slurm job (compute node)</span>
 GROUP=<span class="str">$(id -gn)</span>
 SCRATCH=<span class="str">/data/scratch/$GROUP/$USER</span>
 mkdir -p $SCRATCH/run_${SLURM_JOB_ID}
@@ -183,27 +181,25 @@ cp <span class="str">/data/shared/projects/myproject/input.tar.gz</span> $SCRATC
 cp -r $SCRATCH/run_${SLURM_JOB_ID}/results/ <span class="str">$HOME/completed/</span></code><span class="cmd-label">job.sh</span></pre>
 
       <!-- Apps -->
-      <h2>Apps — <code>/apps/&lt;group&gt;/</code></h2>
-      <p>Software installations — primarily conda environments. Your personal area is at <code>/apps/&lt;group&gt;/&lt;username&gt;/</code> on pasteur-login.</p>
+      <h2>Apps — <code>/data/apps/&lt;group&gt;/</code></h2>
+      <p>Software installations — primarily conda environments. Your personal area is at <code>/data/apps/&lt;group&gt;/&lt;username&gt;/</code>.</p>
 
-      <pre><code><span class="comment"># Create a personal conda environment (on pasteur-login)</span>
-<span class="prompt">$ </span>mamba create <span class="flag">--prefix</span> /apps/$(id -gn)/$USER/my-env python=3.11
+      <pre><code><span class="comment"># Create a personal conda environment</span>
+<span class="prompt">$ </span>mamba create <span class="flag">--prefix</span> /data/apps/$(id -gn)/$USER/my-env python=3.11
 
-<span class="comment"># Activate it interactively</span>
-<span class="prompt">$ </span>conda activate /apps/$(id -gn)/$USER/my-env</code><span class="cmd-label">pasteur-login</span></pre>
+<span class="comment"># Activate it</span>
+<span class="prompt">$ </span>conda activate /data/apps/$(id -gn)/$USER/my-env
 
-      <pre><code><span class="comment"># In a Slurm job script, paths are under /data/apps/ on the compute node</span>
-GROUP=<span class="str">$(id -gn)</span>
-
+<span class="comment"># In a Slurm job script — always source conda first</span>
 source /opt/miniforge3/etc/profile.d/conda.sh
-conda activate <span class="str">/data/apps/$GROUP/$USER/my-env</span></code><span class="cmd-label">job.sh</span></pre>
+conda activate /data/apps/$(id -gn)/$USER/my-env</code><span class="cmd-label">bash</span></pre>
 
       <!-- Shared -->
-      <h2>Shared — <code>/shared/</code></h2>
-      <p>Read-only shared storage. Access is granted per project by an admin. In Slurm job scripts use <code>/data/shared/</code>.</p>
+      <h2>Shared — <code>/data/shared/</code></h2>
+      <p>Read-only shared storage for the lab. Access is granted per project by an admin.</p>
       <ul>
-        <li><code>/shared/archives/</code> — shared archived data</li>
-        <li><code>/shared/projects/</code> — shared project datasets</li>
+        <li><code>/data/shared/archives/</code> — shared archived data</li>
+        <li><code>/data/shared/projects/</code> — shared project datasets</li>
       </ul>
 
       <!-- Best practices -->
@@ -213,12 +209,12 @@ conda activate <span class="str">/data/apps/$GROUP/$USER/my-env</span></code><sp
           <table>
             <thead><tr><th>Use case</th><th>Recommended location</th></tr></thead>
             <tbody>
-              <tr><td>Job scripts &amp; code</td><td><code>$HOME</code> (<code>/mnt/datahome/&lt;user&gt;</code>)</td></tr>
-              <tr><td>Input datasets for a running job</td><td><code>/scratch/&lt;group&gt;/&lt;user&gt;</code> (login) · <code>/data/scratch/&lt;group&gt;/&lt;user&gt;</code> (job)</td></tr>
+              <tr><td>Job scripts &amp; code</td><td><code>$HOME</code> (<code>/data/home/&lt;user&gt;</code>)</td></tr>
+              <tr><td>Input datasets for a running job</td><td><code>/data/scratch/&lt;group&gt;/&lt;user&gt;</code></td></tr>
               <tr><td>Completed experiment results</td><td><code>$HOME</code></td></tr>
-              <tr><td>Shared project data</td><td><code>/shared/projects/</code></td></tr>
-              <tr><td>Archived data</td><td><code>/shared/archives/</code></td></tr>
-              <tr><td>Conda environments (personal)</td><td><code>/apps/&lt;group&gt;/&lt;user&gt;/</code> (login) · <code>/data/apps/&lt;group&gt;/&lt;user&gt;/</code> (job)</td></tr>
+              <tr><td>Shared project data</td><td><code>/data/shared/projects/</code></td></tr>
+              <tr><td>Archived data</td><td><code>/data/shared/archives/</code></td></tr>
+              <tr><td>Conda environments (personal)</td><td><code>/data/apps/&lt;group&gt;/&lt;user&gt;/</code></td></tr>
             </tbody>
           </table>
         </div>

@@ -99,21 +99,21 @@
 
       <!-- Environment -->
       <h2>Step 3 — Explore Your Environment</h2>
-      <p>Once logged in to pasteur-login, your home directory is NFS-mounted from the compute node:</p>
+      <p>Once logged in, your home directory is on the shared <code>/data</code> filesystem — the same paths are visible on both pasteur-login and the compute node:</p>
 
       <pre><code><span class="prompt">$ </span>pwd
-<span class="output">/mnt/datahome/your-username</span>
+<span class="output">/data/home/your-username</span>
 
-<span class="prompt">$ </span>df -h /mnt/datahome
+<span class="prompt">$ </span>df -h /data/home
 <span class="output">Filesystem      Size  Used Avail Use% Mounted on</span>
-<span class="output">pasteur:/data/home   14T  ...  ...  ...  /mnt/datahome</span></code><span class="cmd-label">pasteur-login</span></pre>
+<span class="output">pasteur:/data/home   14T  ...  ...  ...  /data/home</span></code><span class="cmd-label">pasteur-login</span></pre>
 
-      <p>Your storage spans several areas — the exact paths depend on which group you belong to. See the <a href="storage.html">Storage Layout</a> page for details:</p>
+      <p>Your storage spans several areas — the exact paths include your group name, which is assigned when your account is created. See the <a href="storage.html">Storage Layout</a> page for details:</p>
       <ul>
-        <li><code>/mnt/datahome/your-username</code> — personal home directory</li>
-        <li><code>/scratch/&lt;group&gt;/your-username</code> — fast temporary workspace (not backed up)</li>
-        <li><code>/apps/&lt;group&gt;/your-username</code> — conda environments and personal software</li>
-        <li><code>/shared/&lt;project&gt;/</code> — shared project data and containers</li>
+        <li><code>/data/home/your-username</code> — personal home directory</li>
+        <li><code>/data/scratch/&lt;group&gt;/your-username</code> — fast temporary workspace (not backed up)</li>
+        <li><code>/data/apps/&lt;group&gt;/your-username</code> — conda environments and personal software</li>
+        <li><code>/data/shared/</code> — shared project data and archives</li>
       </ul>
 
       <!-- Verify Slurm -->

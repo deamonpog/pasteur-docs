@@ -87,16 +87,16 @@
 <span class="prompt">$ </span>source /opt/miniforge3/etc/profile.d/conda.sh</code><span class="cmd-label">pasteur-login</span></pre>
 
       <h3>Creating Environments</h3>
-      <p>Always create personal environments under <code>/apps/&lt;group&gt;/&lt;username&gt;/</code> — not in <code>/opt/miniforge3</code> (which is read-only) and not in your home directory (quota too small).</p>
+      <p>Always create personal environments under <code>/data/apps/&lt;group&gt;/&lt;username&gt;/</code> — not in <code>/opt/miniforge3</code> (which is read-only) and not in your home directory (counts against quota).</p>
 
       <pre><code><span class="comment"># Create a new environment (use mamba, not conda — it's faster)</span>
-<span class="prompt">$ </span>mamba create <span class="flag">--prefix</span> /apps/$(id -gn)/$USER/my-env python=3.11
+<span class="prompt">$ </span>mamba create <span class="flag">--prefix</span> /data/apps/$(id -gn)/$USER/my-env python=3.11
 <span class="output">  ... solving environment ...</span>
 <span class="output">  ... downloading packages ...</span>
 
 <span class="comment"># Activate it</span>
-<span class="prompt">$ </span>conda activate /apps/$(id -gn)/$USER/my-env
-<span class="output">(/apps/casl/jsmith/my-env) $ </span>
+<span class="prompt">$ </span>conda activate /data/apps/$(id -gn)/$USER/my-env
+<span class="output">(/data/apps/casl/jsmith/my-env) $ </span>
 
 <span class="comment"># Install packages</span>
 <span class="prompt">$ </span>mamba install numpy pandas scikit-learn matplotlib jupyter
@@ -114,7 +114,6 @@
 <span class="flag">#SBATCH --gres</span>=gpu:1
 <span class="comment"># ... other SBATCH options ...</span>
 
-<span class="comment"># Paths are under /data/ on the compute node</span>
 GROUP=<span class="str">$(id -gn)</span>
 
 <span class="comment"># Always source conda before activating in a batch job</span>
@@ -128,18 +127,18 @@ echo "PyTorch: $(python -c 'import torch; print(torch.__version__)')"
 python train.py</code><span class="cmd-label">job.sh</span></pre>
 
       <h3>Shared Lab Environments</h3>
-      <p>Admins may maintain shared conda environments under <code>/apps/&lt;group&gt;/common/</code> for commonly used packages. These are read-only and available to all users in the group without any setup.</p>
+      <p>Admins may maintain shared conda environments under <code>/data/apps/&lt;group&gt;/common/</code> for commonly used packages. These are read-only and available to all users in the group without any setup.</p>
 
-      <pre><code><span class="comment"># List shared environments (on pasteur-login)</span>
-<span class="prompt">$ </span>ls /apps/$(id -gn)/common/
+      <pre><code><span class="comment"># List shared environments</span>
+<span class="prompt">$ </span>ls /data/apps/$(id -gn)/common/
 
 <span class="comment"># Activate a shared env</span>
-<span class="prompt">$ </span>conda activate /apps/$(id -gn)/common/&lt;env-name&gt;
+<span class="prompt">$ </span>conda activate /data/apps/$(id -gn)/common/&lt;env-name&gt;
 
 <span class="comment"># Do NOT install packages into shared envs — they are read-only.</span>
 <span class="comment"># Clone one to your space if you need to modify it:</span>
-<span class="prompt">$ </span>mamba create <span class="flag">--prefix</span> /apps/$(id -gn)/$USER/my-clone \
-           <span class="flag">--clone</span> /apps/$(id -gn)/common/&lt;env-name&gt;</code><span class="cmd-label">pasteur-login</span></pre>
+<span class="prompt">$ </span>mamba create <span class="flag">--prefix</span> /data/apps/$(id -gn)/$USER/my-clone \
+           <span class="flag">--clone</span> /data/apps/$(id -gn)/common/&lt;env-name&gt;</code><span class="cmd-label">pasteur-login</span></pre>
 
       <h3>Useful Conda Commands</h3>
       <div class="table-wrap">
@@ -150,8 +149,8 @@ python train.py</code><span class="cmd-label">job.sh</span></pre>
             <tr><td>List installed packages</td><td><code>conda list</code></td></tr>
             <tr><td>Update all packages</td><td><code>mamba update --all</code></td></tr>
             <tr><td>Export environment</td><td><code>conda env export &gt; env.yml</code></td></tr>
-            <tr><td>Recreate from file</td><td><code>mamba env create --prefix /apps/$(id -gn)/$USER/env -f env.yml</code></td></tr>
-            <tr><td>Delete environment</td><td><code>conda env remove --prefix /apps/$(id -gn)/$USER/env</code></td></tr>
+            <tr><td>Recreate from file</td><td><code>mamba env create --prefix /data/apps/$(id -gn)/$USER/env -f env.yml</code></td></tr>
+            <tr><td>Delete environment</td><td><code>conda env remove --prefix /data/apps/$(id -gn)/$USER/env</code></td></tr>
             <tr><td>Search for package</td><td><code>mamba search package-name</code></td></tr>
           </tbody>
         </table>
@@ -172,35 +171,35 @@ python train.py</code><span class="cmd-label">job.sh</span></pre>
       </div>
 
       <h3>Shared Container Library</h3>
-      <p>Pre-pulled containers may be stored under <code>/shared/</code>. Check there before pulling your own — common ML and scientific containers may already be available.</p>
+      <p>Pre-pulled containers may be stored under <code>/data/shared/</code>. Check there before pulling your own — common ML and scientific containers may already be available.</p>
 
       <pre><code><span class="comment"># List shared areas</span>
-<span class="prompt">$ </span>ls /shared/</code><span class="cmd-label">pasteur-login</span></pre>
+<span class="prompt">$ </span>ls /data/shared/</code><span class="cmd-label">pasteur-login</span></pre>
 
       <h3>Pulling Containers</h3>
       <pre><code><span class="comment"># Pull from Docker Hub — store in your apps dir</span>
-<span class="prompt">$ </span>apptainer pull /apps/$(id -gn)/$USER/containers/ubuntu.sif \
+<span class="prompt">$ </span>apptainer pull /data/apps/$(id -gn)/$USER/containers/ubuntu.sif \
     docker://ubuntu:24.04
 
 <span class="comment"># Pull from NVIDIA NGC (recommended for GPU workloads)</span>
-<span class="prompt">$ </span>apptainer pull /apps/$(id -gn)/$USER/containers/pytorch.sif \
+<span class="prompt">$ </span>apptainer pull /data/apps/$(id -gn)/$USER/containers/pytorch.sif \
     docker://nvcr.io/nvidia/pytorch:24.01-py3</code><span class="cmd-label">pasteur-login</span></pre>
 
       <div class="callout callout-warning">
         <span class="callout-icon">⚠</span>
         <div class="callout-body">
           <strong>Store containers in your apps dir, not home</strong>
-          .sif files are often several GB. Store them under <code>/apps/&lt;group&gt;/&lt;user&gt;/containers/</code> — never in your home directory as it counts against your quota.
+          .sif files are often several GB. Store them under <code>/data/apps/&lt;group&gt;/&lt;user&gt;/containers/</code> — never in your home directory as it counts against your quota.
         </div>
       </div>
 
       <h3>Running Containers</h3>
-      <pre><code><span class="comment"># Run a command inside the container (interactive, on pasteur-login)</span>
-<span class="prompt">$ </span>apptainer exec /apps/$(id -gn)/$USER/containers/pytorch.sif \
+      <pre><code><span class="comment"># Run a command inside the container</span>
+<span class="prompt">$ </span>apptainer exec /data/apps/$(id -gn)/$USER/containers/pytorch.sif \
     python -c "import torch; print(torch.cuda.is_available())"
 
 <span class="comment"># Interactive shell inside container</span>
-<span class="prompt">$ </span>apptainer shell /apps/$(id -gn)/$USER/containers/pytorch.sif</code><span class="cmd-label">pasteur-login</span></pre>
+<span class="prompt">$ </span>apptainer shell /data/apps/$(id -gn)/$USER/containers/pytorch.sif</code><span class="cmd-label">pasteur-login</span></pre>
 
       <h3>Using Containers in Slurm Jobs</h3>
       <pre><code><span class="kw">#!/bin/bash</span>
@@ -262,7 +261,7 @@ From: nvcr.io/nvidia/pytorch:24.01-py3
           <tbody>
             <tr>
               <td>Python ML/data science work</td>
-              <td>Conda env via <code>mamba</code> in <code>/apps/&lt;group&gt;/$USER/</code></td>
+              <td>Conda env via <code>mamba</code> in <code>/data/apps/&lt;group&gt;/$USER/</code></td>
             </tr>
             <tr>
               <td>Specific CUDA version required</td>
@@ -274,11 +273,11 @@ From: nvcr.io/nvidia/pytorch:24.01-py3
             </tr>
             <tr>
               <td>Sharing a reproducible environment</td>
-              <td>Apptainer .sif in <code>/shared/</code> or <code>/apps/&lt;group&gt;/$USER/containers/</code></td>
+              <td>Apptainer .sif in <code>/data/shared/</code> or <code>/data/apps/&lt;group&gt;/$USER/containers/</code></td>
             </tr>
             <tr>
               <td>Quick prototype / exploration</td>
-              <td>Shared conda env at <code>/apps/&lt;group&gt;/common/</code></td>
+              <td>Shared conda env at <code>/data/apps/&lt;group&gt;/common/</code></td>
             </tr>
           </tbody>
         </table>
